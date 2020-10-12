@@ -155,7 +155,7 @@ function addEmployee() {
 
 // Update employee role
 function updateEmployee() {
-    inquirer.prompt ([
+    inquirer.prompt([
         {
             name: "employeeId",
             type: "number",
@@ -168,15 +168,21 @@ function updateEmployee() {
             // choices: need to know how to reference exsting roles and make them choices
         },
     ]).then(choices => {
-        connection.query(`UPDATE employee SET ? WHERE ?`),
-        [
-            {
-                role_id: `${choices.employeeRole}`
-            },
-            {
-                employee_id: `${employeeId}`
+        connection.query(`UPDATE employee SET ? WHERE ?`,
+            [
+                {
+                    role_id: `${choices.employeeRole}`
+                },
+                {
+                    employee_id: `${employeeId}`
+                }
+            ],
+            (err, res) => {
+                if (err) throw err;
+                console.log(`${res.affectedRows} updated`)
+                startProgram();
             }
-        ]
+        )
     })
 };
 
