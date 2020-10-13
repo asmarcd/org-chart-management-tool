@@ -1,5 +1,6 @@
 const inquirer = require("inquirer");
 const mysql = require("mysql");
+require("console.table");
 
 const connection = mysql.createConnection({
     host: "localhost",
@@ -16,7 +17,6 @@ const connection = mysql.createConnection({
 connection.connect(err => {
     if (err) throw err;
     console.log("connected as id " + connection.threadId);
-    printOrgChart();
     startProgram();
 });
 
@@ -81,6 +81,68 @@ function printOrgChart() {
     });
 };
 
+// Here, you're joining the data in the two tables where (on) the author ID field on the books table is equal to the id field on the authors table.
+
+function exampleJoinFunction() {
+    connection.query("SELECT title, firstName, lastName FROM books INNER JOIN authors ON books.authorId = authors.id", (err, data) => {
+        if (err) throw err;
+        console.log(data);
+    })
+};
+
+// Here is an example of adding a new person to a table. Need to ask the user what the person's first and last name are separately. Any datapoint needs its own response. You you'd do an inquirer prompt, then fill out the mysql line with the answers from that:
+function exampleAddAuthor() {
+    // inquirer prompt delivers answers
+    connection.query("`INSERT INTO authors SET ?", {
+        firstName: firstName,
+        lastName: lastName
+    }, (err, data) => {
+        if (err) throw err;
+        console.log("Author Added");
+        setTimeout(startProgram, 2000)
+    })
+};
+// Doing the above will create an author id for the new author, but how do we tie that to the book? 
+// Add a new book like the below. Again this would be what would fire after the relevant inquirer prompt collecting all the needed data about the new item to be added. You can reference the able to fill out the list choices by including the inquirer prompt inside a connection query. You could use an if else to give people a go back option. If they choose go back, send them bcak to the beginning. Else move them forward appropriately.
+
+function exampleAddBook() {
+    connection.query("SELECT * FROM authors", (err, results) => {
+        if (err) throw err;
+
+        inquirer.prompt([
+            {
+                type: "text",
+                name: "bookName",
+                message: "enter book name"
+            },
+            {
+                type: "rawlist",
+                name: "bookAuthor",
+                message: "Select Author of Book",
+                choices: function () {
+                    const choicesArray = [];
+                    for (let i = 0; i < results.length; i++) {
+                        choicesArray.push(results[i].firstName + " " + results[i].lastName)
+                    }
+                    return choicesArray
+                }
+            }
+        ]).then(({ bookName, bookAuthor }) => {
+            const [firstName, lastName] = bookAuthor.split(" ");
+            const [foundAuthor] = results.filter(author => author.firstName === firstName && author.lastName === lastName)
+
+            connection.query("INSERT INTO books SET ?", {
+                title: bookName,
+                authorId: foundAuthor.id
+            }, (err, data) => {
+                if (err) throw err;
+                console.log("Book added")
+                setTimeout(startProgram, 2000)
+            })
+        })
+    })
+};
+
 // Add a department to the database
 function addDepartment() {
     inquirer.prompt([
@@ -90,7 +152,7 @@ function addDepartment() {
             message: "What is the department called?"
         }
     ]).then(choice => {
-        connection.query(`INSERT INTO department(name)VALUES ("${choice.deptName}")`, (err, data) => {
+        connection.query(`INSERT INTO department SET ?`, { name: deptName }, (err, data) => {
             if (err) {
                 throw err;
             } else {
@@ -116,7 +178,10 @@ function addRole() {
         }
         // Do I need to insert a question associated with dept ID here?
     ]).then(choices => {
-        connection.query(`INSERT INTO role(title, salary)VALUES ("${choices.roleTitle}", ${choices.roleSalary})`, (err, data) => {
+        connection.query("INSERT INTO role SET ?", {
+            title: roleTitle,
+            salary: roleSalary
+        }, (err, data) => {
             if (err) {
                 throw err;
             } else {
@@ -142,7 +207,10 @@ function addEmployee() {
         }
         // Do I need to include role and manager ID questions here?
     ]).then(choices => {
-        connection.query(`INSERT INTO employee(first_name, last_name)VALUES("${choices.employeeFirstName}", "${choices.employeeLastName}")`, (err, data) => {
+        connection.query("INSERT INTO employee SET ?", {
+            first_name: employeeFirstName,
+            last_name: employeeLastName,
+        }, (err, data) => {
             if (err) {
                 throw err;
             } else {
