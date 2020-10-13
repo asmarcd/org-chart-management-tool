@@ -165,7 +165,7 @@ function addDepartment() {
             message: "What is the department called?"
         }
     ]).then(choice => {
-        connection.query(`INSERT INTO department SET ?`, { name: deptName }, (err, data) => {
+        connection.query(`INSERT INTO department SET ?`, { name: choice.deptName }, (err, data) => {
             if (err) {
                 throw err;
             } else {
