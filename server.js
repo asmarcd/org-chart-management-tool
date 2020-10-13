@@ -51,9 +51,9 @@ function startProgram() {
                 console.log("Have a great day!");
                 break;
             case "TEST DISPLAY ALL DATA":
-            testDisplayAllData();
-            connection.end();
-            console.log("Have a great day!");
+                testDisplayAllData();
+                connection.end();
+                console.log("Have a great day!");
         }
     })
 };
@@ -89,7 +89,7 @@ function printOrgChart() {
             throw err;
         } else {
             console.table(data);
-            startProgram();
+            setTimeout(startProgram, 2000);
         };
     });
 };
@@ -170,7 +170,7 @@ function addDepartment() {
                 throw err;
             } else {
                 console.log(`${choice.deptName} has been added to the list of departments`);
-                startProgram();
+                setTimeout(startProgram, 2000);
             }
         })
     })
@@ -178,29 +178,45 @@ function addDepartment() {
 
 // Add a role to the database
 function addRole() {
-    inquirer.prompt([
-        {
-            name: "roleTitle",
-            type: "input",
-            message: "What is the role called?"
-        },
-        {
-            name: "roleSalary",
-            type: "number",
-            message: "What is the associated salary? (Number only)"
-        }
-        // Do I need to insert a question associated with dept ID here?
-    ]).then(choices => {
-        connection.query("INSERT INTO role SET ?", {
-            title: roleTitle,
-            salary: roleSalary
-        }, (err, data) => {
-            if (err) {
-                throw err;
-            } else {
-                console.log(`${choices.roleTitle} with salary of $${choices.roleSalary}.00 has been added to the list of roles`);
-                startProgram();
+    connection.query("SELECT * FROM department", (err, results) => {
+        if (err) throw err;
+        inquirer.prompt([
+            {
+                name: "roleTitle",
+                type: "input",
+                message: "What is the role called?"
+            },
+            {
+                name: "roleSalary",
+                type: "number",
+                message: "What is the associated salary? (Number only)"
+            },
+            {
+                name: "deptName",
+                type: "rawlist",
+                message: "What department does this position roll up to?",
+                choices: function () {
+                    const deptArray = [];
+                    for (let i = 0; i < results.length; i++) {
+                        deptArray.push(results[i].name);
+                    }
+                    return deptArray;
+                }
             }
+        ]).then(({ roleTitle, roleSalary, deptName }) => {
+            const [foundDept] = results.filter(dept => dept.deptName === deptName)
+            connection.query("INSERT INTO role SET ?", {
+                title: roleTitle,
+                salary: roleSalary,
+                dept_name: deptName
+            }, (err, data) => {
+                if (err) {
+                    throw err;
+                } else {
+                    console.log(`${roleTitle} with salary of $${roleSalary} has been added to the list of roles in the ${deptName} department`);
+                    setTimeout(startProgram, 2000)
+                }
+            })
         })
     })
 };
@@ -228,7 +244,7 @@ function addEmployee() {
                 throw err;
             } else {
                 console.log(`${choices.employeeFirstName} ${choices.employeeLastName} has been added to the list of employees`);
-                startProgram();
+                setTimeout(startProgram, 2000);
             }
         })
     })
@@ -261,7 +277,7 @@ function updateEmployee() {
             (err, res) => {
                 if (err) throw err;
                 console.log(`${res.affectedRows} updated`)
-                startProgram();
+                setTimeout(startProgram, 2000);
             }
         )
     })

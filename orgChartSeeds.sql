@@ -14,6 +14,7 @@ CREATE TABLE role (
     id INT NOT NULL AUTO_INCREMENT,
     title VARCHAR(30) NOT NULL,
     salary DECIMAL(8,2) NOT NULL,
+    dept_name VARCHAR(30),
     department_id INT,
     PRIMARY KEY (id),
     FOREIGN KEY (department_id) REFERENCES department(id)
@@ -40,7 +41,7 @@ VALUES ("John", "Smith", "Junior Engineer", "Engineering");
 INSERT INTO employee (first_name, last_name, role_title, department_name) 
 VALUES ("Jackie", "Martin", "Engineering Manager", "Engineering");
 
-INSERT INTO role (title, salary) 
-VALUES ("Engineering Manager", 120000);
-INSERT INTO role (title, salary) 
-VALUES ("Junior Engineer", 70000);
+INSERT INTO role (title, salary, dept_name) 
+VALUES ("Engineering Manager", 120000, "Engineering");
+INSERT INTO role (title, salary, dept_name) 
+VALUES ("Junior Engineer", 70000, "Engineering");
