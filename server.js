@@ -223,29 +223,44 @@ function addRole() {
 
 // Add an employee to the database
 function addEmployee() {
-    inquirer.prompt([
-        {
-            name: "employeeFirstName",
-            type: "input",
-            message: "Please enter the employee's first name:"
-        },
-        {
-            name: "employeeLastName",
-            type: "input",
-            message: "Please enter the employee's last name:"
-        },
-        // Do I need to include role and manager ID questions here? Yes. See the function in the bookAuthor example above to get that in place.
-    ]).then(choices => {
-        connection.query("INSERT INTO employee SET ?", {
-            first_name: employeeFirstName,
-            last_name: employeeLastName,
-        }, (err, data) => {
-            if (err) {
-                throw err;
-            } else {
-                console.log(`${choices.employeeFirstName} ${choices.employeeLastName} has been added to the list of employees`);
-                setTimeout(startProgram, 2000);
+    connection.query("SELECT * FROM role", (err, results) => {
+        if (err) throw err;
+        inquirer.prompt([
+            {
+                name: "employeeFirstName",
+                type: "input",
+                message: "Please enter the employee's first name:"
+            },
+            {
+                name: "employeeLastName",
+                type: "input",
+                message: "Please enter the employee's last name:"
+            },
+            {
+                name: "employeeRole",
+                type: "rawlist",
+                message: "Choose a role for the new employee:",
+                choices: function () {
+                    const roleArray = [];
+                    for (let i = 0; i < results.length; i++) {
+                        roleArray.push(results[i].title);
+                    }
+                    return roleArray;
+                }
             }
+        ]).then(({ employeeFirstName, employeeLastName, employeeRole }) => {
+            connection.query("INSERT INTO employee SET ?", {
+                first_name: employeeFirstName,
+                last_name: employeeLastName,
+                role_title: employeeRole
+            }, (err, data) => {
+                if (err) {
+                    throw err;
+                } else {
+                    console.log(`New ${employeeRole} ${employeeFirstName} ${employeeLastName} has been added to the list of employees`);
+                    setTimeout(startProgram, 2000);
+                }
+            })
         })
     })
 };
