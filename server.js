@@ -350,19 +350,89 @@ function deleteEmployee() {
         })
     })
 };
+function deleteEmployee() {
+    connection.query("SELECT * FROM employee", (err, results) => {
+        if (err) throw err;
+        inquirer.prompt([
+            {
+                name: "deleteEmployee",
+                type: "rawlist",
+                message: "Which employee should be deleted?",
+                choices: function () {
+                    if (err) throw err;
+                    const deleteArray = [];
+                    for (let i = 0; i < results.length; i++) {
+                        let employeeFullName = results[i].id + " " + results[i].first_name + " " + results[i].last_name;
+                        deleteArray.push(employeeFullName);
+                    }
+                    return deleteArray;
+                }
+            }
+        ]).then(({deleteEmployee}) => {
+            const [id, firstName, lastName] = deleteEmployee.split(" ");
+            connection.query(`DELETE FROM employee WHERE id = ${id}`, (err, data) => {
+                if (err) throw err;
+                console.log(`${firstName} ${lastName} has been deleted`)
+                setTimeout(startProgram, 1000);
+            })
+        })
+    })
+};
 
-function deleteRole() { };
+function deleteRole() {
+    connection.query("SELECT * FROM role", (err, results) => {
+        if (err) throw err;
+        inquirer.prompt([
+            {
+                name: "deleteRole",
+                type: "rawlist",
+                message: "Which role should be deleted?",
+                choices: function () {
+                    if (err) throw err;
+                    const deleteArray = [];
+                    for (let i = 0; i < results.length; i++) {
+                        let fullRole = results[i].id + " " + results[i].title;
+                        deleteArray.push(fullRole);
+                    }
+                    return deleteArray;
+                }
+            }
+        ]).then(({deleteRole}) => {
+            const [id, roleName] = deleteRole.split(" ");
+            connection.query(`DELETE FROM role WHERE id = ${id}`, (err, data) => {
+                if (err) throw err;
+                console.log(`${roleName} has been deleted`)
+                setTimeout(startProgram, 1000);
+            })
+        })
+    })
+};
 
-function deleteDepartment() { };
-
-
-// Bonus points if you're able to:
-
-// * Update employee managers
-
-// * View employees by manager
-
-// * Delete departments, roles, and employees
-
-// * View the total utilized budget of a department -- ie the combined salaries of all employees in that department
-// TODO: Ensure 
+function deleteDepartment() {
+    connection.query("SELECT * FROM department", (err, results) => {
+        if (err) throw err;
+        inquirer.prompt([
+            {
+                name: "deleteDepartment",
+                type: "rawlist",
+                message: "Which department should be deleted?",
+                choices: function () {
+                    if (err) throw err;
+                    const deleteArray = [];
+                    for (let i = 0; i < results.length; i++) {
+                        let fullDept = results[i].id + " " + results[i].name;
+                        deleteArray.push(fullDept);
+                    }
+                    return deleteArray;
+                }
+            }
+        ]).then(({deleteDepartment}) => {
+            const [id, deptName] = deleteDepartment.split(" ");
+            connection.query(`DELETE FROM department WHERE id = ${id}`, (err, data) => {
+                if (err) throw err;
+                console.log(`${deptName} has been deleted`)
+                setTimeout(startProgram, 1000);
+            })
+        })
+    })
+};
