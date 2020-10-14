@@ -250,11 +250,12 @@ function addEmployee() {
                 }
             }
         ]).then(({ employeeFirstName, employeeLastName, employeeRole }) => {
-            
+            const [foundRole] = results.filter(roleChoice => roleChoice.title === employeeRole)
             connection.query("INSERT INTO employee SET ?", {
                 first_name: employeeFirstName,
                 last_name: employeeLastName,
-                role_title: employeeRole
+                role_title: employeeRole,
+                role_id: foundRole.id
             }, (err, data) => {
                 if (err) {
                     throw err;
