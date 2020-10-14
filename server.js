@@ -80,16 +80,17 @@ function testDisplayAllData() {
             console.table(data);
         }
     })
+    setTimeout(startProgram, 1000);
 }
 
 // Display charts in the console
 function printOrgChart() {
-    connection.query("SELECT first_name, last_name, title, salary FROM employee INNER JOIN role ON role.title = employee.role_title", (err, data) => {
+    connection.query("SELECT first_name, last_name, title, dept_name, salary FROM employee INNER JOIN role ON role.title = employee.role_title", (err, data) => {
         if (err) {
             throw err;
         } else {
             console.table(data);
-            setTimeout(startProgram, 2000);
+            setTimeout(startProgram, 1000);
         };
     });
 };
@@ -112,7 +113,7 @@ function printOrgChart() {
 //     }, (err, data) => {
 //         if (err) throw err;
 //         console.log("Author Added");
-//         setTimeout(startProgram, 2000)
+//         setTimeout(startProgram, 1000)
 //     })
 // };
 // Doing the above will create an author id for the new author, but how do we tie that to the book? 
@@ -150,7 +151,7 @@ function printOrgChart() {
 //             }, (err, data) => {
 //                 if (err) throw err;
 //                 console.log("Book added")
-//                 setTimeout(startProgram, 2000)
+//                 setTimeout(startProgram, 1000)
 //             })
 //         })
 //     })
@@ -170,7 +171,7 @@ function addDepartment() {
                 throw err;
             } else {
                 console.log(`${choice.deptName} has been added to the list of departments`);
-                setTimeout(startProgram, 2000);
+                setTimeout(startProgram, 1000);
             }
         })
     })
@@ -215,7 +216,7 @@ function addRole() {
                     throw err;
                 } else {
                     console.log(`${roleTitle} with salary of $${roleSalary} has been added to the list of roles in the ${deptName} department`);
-                    setTimeout(startProgram, 2000)
+                    setTimeout(startProgram, 1000)
                 }
             })
         })
@@ -261,68 +262,57 @@ function addEmployee() {
                     throw err;
                 } else {
                     console.log(`New ${employeeRole} ${employeeFirstName} ${employeeLastName} has been added to the list of employees`);
-                    setTimeout(startProgram, 2000);
+                    setTimeout(startProgram, 1000);
                 }
             })
         })
     })
 };
 
-// // Update employee role
-// function updateEmployee() {
-//     connection.query("SELECT * FROM employee", (err, results) => {
-//         inquirer.prompt([
-//             {
-//                 name: "employeeId",
-//                 type: "rawlist",
-//                 message: "Choose an Employee:",
-//                 choices: function () {
+// Update employee role
+function updateEmployee() {
+    connection.query("SELECT * FROM employee INNER JOIN role ON role.id = employee.role_id", (err, results) => {
+        inquirer.prompt([
+            {
+                name: "employeeName",
+                type: "rawlist",
+                message: "Choose an Employee:",
+                choices: function () {
+                    if (err) throw err;
+                    const employeeArray = [];
+                    for (let i = 0; i < results.length; i++) {
+                        let employeeFullName = results[i].id + " " + results[i].first_name + " " + results[i].last_name;
+                        employeeArray.push(employeeFullName);
+                    }
+                    return employeeArray;
+                }
+            },
+            {
+                name: "employeeRole",
+                type: "list",
+                message: "Choose a new role:",
+                choices: function () {
+                    const roleArray = [];
+                    for (let i = 0; i < results.length; i++) {
+                        roleArray.push(results[i].title);
+                    }
+                    return roleArray;
+                }
 
-//                     if (err) throw err;
-//                     const employeeArray = [];
-//                     for (let i = 0; i < results.length; i++) {
-//                         let employeeFullName = results[i].first_name + " " + results[i].last_name;
-//                         employeeArray.push(employeeFullName);
-//                     }
-//                     return employeeArray;
-
-//                 }
-//             }].then()
-//         )
-//     },
-//         {
-//             name: "employeeRole",
-//             type: "list",
-//             message: "Choose a new role:",
-//             choices: function () {
-//                 connection.query("SELECT * FROM role", (err, results) => {
-//                     if (err) throw err;
-//                     const employeeArray = [];
-//                     for (let i = 0; i < results.length; i++) {
-//                         employeeArray.push(results[i].title);
-//                     }
-//                 }
-//                 )
-//             }
-//         },
-//     ]).then(choices => {
-//             connection.query(`UPDATE employee SET ? WHERE ?`,
-//                 [
-//                     {
-//                         role_id: `${choices.employeeRole}`
-//                     },
-//                     {
-//                         employee_id: `${employeeId}`
-//                     }
-//                 ],
-//                 (err, res) => {
-//                     if (err) throw err;
-//                     console.log(`${res.affectedRows} updated`)
-//                     setTimeout(startProgram, 2000);
-//                 }
-//             )
-//         })
-// };
+            }
+        ]).then(({ employeeName, employeeRole }) => {
+            const [id, firstName, lastName] = employeeName.split(" ");
+            connection.query(`UPDATE employee SET role_title = '${employeeRole}' WHERE id = ${id}`,
+                (err, res) => {
+                    if (err) throw err;
+                    console.log(`${res.affectedRows} updated`)
+                    setTimeout(startProgram, 1000);
+                }
+            )
+        })
+    }
+    )
+};
 
 
 // Bonus points if you're able to:
