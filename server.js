@@ -204,11 +204,12 @@ function addRole() {
                 }
             }
         ]).then(({ roleTitle, roleSalary, deptName }) => {
-            const [foundDept] = results.filter(dept => dept.deptName === deptName)
+            const [foundDept] = results.filter(dept => dept.name === deptName)
             connection.query("INSERT INTO role SET ?", {
                 title: roleTitle,
                 salary: roleSalary,
-                dept_name: deptName
+                dept_name: deptName,
+                department_id: foundDept.id
             }, (err, data) => {
                 if (err) {
                     throw err;
@@ -249,6 +250,7 @@ function addEmployee() {
                 }
             }
         ]).then(({ employeeFirstName, employeeLastName, employeeRole }) => {
+            
             connection.query("INSERT INTO employee SET ?", {
                 first_name: employeeFirstName,
                 last_name: employeeLastName,
@@ -265,38 +267,61 @@ function addEmployee() {
     })
 };
 
-// Update employee role
-function updateEmployee() {
-    inquirer.prompt([
-        {
-            name: "employeeId",
-            type: "number",
-            message: "Enter an Employee ID Number"
-        },
-        {
-            name: "employeeRole",
-            type: "list",
-            message: "Choose a new role ID"
-            // choices: need to know how to reference exsting roles and make them choices
-        },
-    ]).then(choices => {
-        connection.query(`UPDATE employee SET ? WHERE ?`,
-            [
-                {
-                    role_id: `${choices.employeeRole}`
-                },
-                {
-                    employee_id: `${employeeId}`
-                }
-            ],
-            (err, res) => {
-                if (err) throw err;
-                console.log(`${res.affectedRows} updated`)
-                setTimeout(startProgram, 2000);
-            }
-        )
-    })
-};
+// // Update employee role
+// function updateEmployee() {
+//     connection.query("SELECT * FROM employee", (err, results) => {
+//         inquirer.prompt([
+//             {
+//                 name: "employeeId",
+//                 type: "rawlist",
+//                 message: "Choose an Employee:",
+//                 choices: function () {
+
+//                     if (err) throw err;
+//                     const employeeArray = [];
+//                     for (let i = 0; i < results.length; i++) {
+//                         let employeeFullName = results[i].first_name + " " + results[i].last_name;
+//                         employeeArray.push(employeeFullName);
+//                     }
+//                     return employeeArray;
+
+//                 }
+//             }].then()
+//         )
+//     },
+//         {
+//             name: "employeeRole",
+//             type: "list",
+//             message: "Choose a new role:",
+//             choices: function () {
+//                 connection.query("SELECT * FROM role", (err, results) => {
+//                     if (err) throw err;
+//                     const employeeArray = [];
+//                     for (let i = 0; i < results.length; i++) {
+//                         employeeArray.push(results[i].title);
+//                     }
+//                 }
+//                 )
+//             }
+//         },
+//     ]).then(choices => {
+//             connection.query(`UPDATE employee SET ? WHERE ?`,
+//                 [
+//                     {
+//                         role_id: `${choices.employeeRole}`
+//                     },
+//                     {
+//                         employee_id: `${employeeId}`
+//                     }
+//                 ],
+//                 (err, res) => {
+//                     if (err) throw err;
+//                     console.log(`${res.affectedRows} updated`)
+//                     setTimeout(startProgram, 2000);
+//                 }
+//             )
+//         })
+// };
 
 
 // Bonus points if you're able to:
