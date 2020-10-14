@@ -27,7 +27,7 @@ function startProgram() {
             name: "startQuestion",
             type: "list",
             message: "What would you like to do?",
-            choices: ["See the Org Chart", "Add a department", "Add a role", "Add an employee", "Update an existing employee's role", "Quit", "TEST DISPLAY ALL DATA"]
+            choices: ["See the Org Chart", "Add a department", "Add a role", "Add an employee", "Update an existing employee's role", "Delete an Employee", "Delete a Role", "Delete a Department", "Quit", "TEST DISPLAY ALL DATA"]
         }
     ]).then(choice => {
         switch (choice.startQuestion) {
@@ -45,6 +45,15 @@ function startProgram() {
                 break;
             case "Update an existing employee's role":
                 updateEmployee();
+                break;
+            case "Delete an Employee":
+                deleteEmployee();
+                break;
+            case "Delete a Role":
+                deleteRole();
+                break;
+            case "Delete a Department":
+                deleteDepartment();
                 break;
             case "Quit":
                 connection.end();
@@ -298,7 +307,6 @@ function updateEmployee() {
                     }
                     return roleArray;
                 }
-
             }
         ]).then(({ employeeName, employeeRole }) => {
             const [id, firstName, lastName] = employeeName.split(" ");
@@ -313,6 +321,39 @@ function updateEmployee() {
     }
     )
 };
+
+// Delete employee
+function deleteEmployee() {
+    connection.query("SELECT * FROM employee", (err, results) => {
+        if (err) throw err;
+        inquirer.prompt([
+            {
+                name: "deleteEmployee",
+                type: "rawlist",
+                message: "Which employee should be deleted?",
+                choices: function () {
+                    if (err) throw err;
+                    const deleteArray = [];
+                    for (let i = 0; i < results.length; i++) {
+                        let employeeFullName = results[i].id + " " + results[i].first_name + " " + results[i].last_name;
+                        deleteArray.push(employeeFullName);
+                    }
+                    return deleteArray;
+                }
+            }
+        ]).then(({deleteEmployee}) => {
+            const [id, firstName, lastName] = deleteEmployee.split(" ");
+            connection.query(`DELETE FROM employee WHERE id = ${id}`, (err, data) => {
+                if (err) throw err;
+                console.log(`${firstName} ${lastName} has been deleted`)
+            })
+        })
+    })
+};
+
+function deleteRole() { };
+
+function deleteDepartment() { };
 
 
 // Bonus points if you're able to:
